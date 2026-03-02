@@ -58,30 +58,53 @@ body.dark .toggle-thumb { transform:translateX(16px); }
 .pill { padding:8px 14px; border-radius:20px; border:1px solid var(--border); background:var(--white); color:var(--muted); font-size:13px; font-weight:500; cursor:pointer; font-family:inherit; white-space:nowrap; -webkit-user-select:none; transition:all 0.12s; }
 .pill.on { background:var(--accent); color:var(--bg); border-color:var(--accent); }
 
-/* ── BUDGET BAR ── */
-#budget-bar {
-  display: none;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
-  gap: 8px;
-  flex-direction: column;
-}
-#budget-bar.visible { display: flex; }
 
-.budget-input-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+/* ── BUDGET BAR ── */
+#budget-mini{
+  display:none;
+  flex-basis:100%;
+  width:100%;
+  padding:10px 0 0;
 }
-.budget-input-row label {
-  font-size: 13px;
+#budget-mini.visible{ display:block; }
+
+.budget-min { display:flex; flex-direction:column; gap:6px; }
+
+.budget-line1 {
+  font-size: 14px;
   font-weight: 600;
+  color: var(--text);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+  -webkit-user-select:none;
+}
+.budget-line1 .budget-edit { color: var(--muted); font-weight: 700; font-size: 12px; }
+
+.budget-line2 {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.budget-edit-row {
+  display:none;
+  align-items:center;
+  gap:8px;
+  margin-top:2px;
+}
+#budget-mini.editing .budget-edit-row { display:flex; }
+
+.budget-edit-row label {
+  font-size: 12px;
+  font-weight: 700;
   color: var(--muted);
   white-space: nowrap;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
-.budget-input-row input {
-  flex: 1;
+.budget-edit-row input {
+  flex: 0 0 160px;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--white);
@@ -91,37 +114,21 @@ body.dark .toggle-thumb { transform:translateX(16px); }
   padding: 8px 12px;
   outline: none;
   -webkit-appearance: none;
-  max-width: 160px;
 }
-.budget-input-row input:focus { border-color: #888; }
+.budget-edit-row input:focus { border-color: #888; }
 
-.budget-summary {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
+.budget-bar-track{
+  height:4px;
+  border-radius:999px;
+  background: var(--border);
+  overflow:hidden;
 }
-.bsum-cell {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 10px 8px;
-  text-align: center;
+.budget-bar-fill{
+  height:100%;
+  width:0%;
+  background: var(--accent);
 }
-.bsum-label {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--muted);
-  margin-bottom: 4px;
-}
-.bsum-val {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text);
-}
-.bsum-cell.over .bsum-val { color: var(--red); }
-.bsum-cell.over .bsum-label { color: var(--red); }
+
 
 /* ── CONTENT ── */
 .content { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0 0 8px; }
@@ -186,10 +193,11 @@ table { width:100%; border-collapse:collapse; background:var(--white); }
 }
 .num-inp::placeholder { color:var(--border); font-weight:400; }
 
-.tbl-total .cell-inp { font-weight:700; padding:15px 14px; }
-.tbl-total .num-inp  { font-weight:700; padding:15px 8px; }
+.tbl-total .cell-inp { font-weight:700; padding:14px 14px; }
+.tbl-total .num-inp  { font-weight:700; padding:14px 8px; }
 
 .name-cell { display:flex; align-items:center; }
+.tbl-total .name-cell { align-items:center; }
 .check {
   flex-shrink:0; margin-left:12px;
   width:24px; height:24px; border-radius:50%; border:2px solid var(--border);
@@ -221,6 +229,13 @@ textarea.inp { min-height:120px; resize:none; font-family:'Menlo',monospace; fon
 
 /* bottom action bar */
 .action-bar { padding:10px 16px calc(var(--safe-bottom) + 10px); background:var(--bg); border-top:1px solid var(--border); display:flex; justify-content:flex-end; }
+
+/* minimal additions */
+.total-check { margin-left:0 !important; margin-right:10px; }
+.nr-clear { color: var(--border); }
+.below-add { display:flex; justify-content:flex-end; padding:10px 14px 0; }
+.below-add-btn { background:var(--accent); border:none; color:var(--bg); font-size:22px; font-weight:800; cursor:pointer; width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center; }
+
 </style>
 </head>
 <body>
@@ -229,7 +244,7 @@ textarea.inp { min-height:120px; resize:none; font-family:'Menlo',monospace; fon
 <div id="home" class="screen active">
   <div class="header">
     <div class="header-row">
-      <h1>My Lists</h1>
+      <h1>Listly</h1>
       <div style="display:flex;align-items:center;gap:10px;">
         <div class="toggle-wrap" onclick="toggleDark()">
           <span id="dark-label" style="font-size:16px;">☀️</span>
@@ -258,34 +273,32 @@ textarea.inp { min-height:120px; resize:none; font-family:'Menlo',monospace; fon
   <!-- TOOLBAR with Budget pill -->
   <div class="toolbar">
     <button class="pill" id="btn-qty" onclick="toggleQtyMode()">Qty + Unit</button>
-    <button class="pill" onclick="selectAll()">Select All</button>
-    <button class="pill" onclick="deselectAll()">Deselect All</button>
-    <button class="pill" id="btn-budget" onclick="toggleBudget()">💰 Budget</button>
+<button class="pill" id="btn-budget" onclick="toggleBudget()">💰 Budget</button>
     <button class="pill" onclick="showModal('m-addcat')" style="margin-left:auto;">+ Category</button>
+  
+
+    <!-- BUDGET MINI (minimal) -->
+      <div id="budget-mini">
+        <div class="budget-min">
+          <div class="budget-line1" onclick="enterBudgetEdit()">
+            💰 <span>Budget:</span> <span id="bd-budget">£0</span> <span class="budget-edit">✎</span>
+          </div>
+          <div class="budget-line2" id="bd-line2">£0 spent · £0 left</div>
+    
+          <div class="budget-edit-row">
+            <label>Budget</label>
+            <input type="text" inputmode="decimal" id="budget-input" placeholder="0.00" oninput="saveBudget()" onchange="saveBudget()">
+            <button class="ghost-btn" onclick="exitBudgetEdit()">Done</button>
+          </div>
+    
+          <div class="budget-bar-track" aria-hidden="true">
+            <div class="budget-bar-fill" id="bd-fill"></div>
+          </div>
+        </div>
+      </div>
   </div>
 
-  <!-- BUDGET BAR -->
-  <div id="budget-bar">
-    <div class="budget-input-row">
-      <label>Budget £</label>
-      <input type="text" inputmode="decimal" id="budget-input" placeholder="0.00" oninput="saveBudget()" onchange="saveBudget()">
-    </div>
-    <div class="budget-summary">
-      <div class="bsum-cell">
-        <div class="bsum-label">Budget</div>
-        <div class="bsum-val" id="bs-budget">£0</div>
-      </div>
-      <div class="bsum-cell">
-        <div class="bsum-label">Spent</div>
-        <div class="bsum-val" id="bs-spent">£0</div>
-      </div>
-      <div class="bsum-cell" id="bs-rem-cell">
-        <div class="bsum-label" id="bs-rem-label">Remaining</div>
-        <div class="bsum-val" id="bs-remaining">£0</div>
-      </div>
-    </div>
-  </div>
-
+  
   <div class="content" id="lv-body"></div>
   <div class="action-bar">
     <button onclick="showModal('m-additem')" style="width:44px;height:44px;border-radius:13px;background:var(--accent);color:var(--bg);border:none;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✏️</button>
@@ -461,8 +474,9 @@ function openList(id) {
   var l = GL();
   budgetOn = !!(l && l.budgetOn);
   document.getElementById('btn-budget').classList.toggle('on', budgetOn);
-  document.getElementById('budget-bar').classList.toggle('visible', budgetOn);
+  document.getElementById('budget-mini').classList.toggle('visible', budgetOn);
   if (budgetOn) {
+    exitBudgetEdit();
     document.getElementById('budget-input').value = (l.budget || '');
     updateBudgetBar();
   }
@@ -487,7 +501,7 @@ function toggleQtyMode() {
 function toggleBudget() {
   budgetOn = !budgetOn;
   document.getElementById('btn-budget').classList.toggle('on', budgetOn);
-  var bar = document.getElementById('budget-bar');
+  var bar = document.getElementById('budget-mini');
   bar.classList.toggle('visible', budgetOn);
 
   var l = GL();
@@ -497,10 +511,24 @@ function toggleBudget() {
   }
 
   if (budgetOn) {
+    exitBudgetEdit();
     document.getElementById('budget-input').value = (l && l.budget) ? l.budget : '';
     updateBudgetBar();
-    setTimeout(function(){ document.getElementById('budget-input').focus(); }, 100);
-  }
+}
+}
+
+function enterBudgetEdit() {
+  var bar = document.getElementById('budget-mini');
+  if (!bar || !bar.classList.contains('visible')) return;
+  bar.classList.add('editing');
+  setTimeout(function(){
+    var inp = document.getElementById('budget-input');
+    if (inp) { inp.focus(); if (inp.select) inp.select(); }
+  }, 50);
+}
+function exitBudgetEdit() {
+  var bar = document.getElementById('budget-mini');
+  if (bar) bar.classList.remove('editing');
 }
 
 function saveBudget() {
@@ -513,19 +541,35 @@ function saveBudget() {
 
 function updateBudgetBar() {
   var l = GL(); if (!l) return;
-  var budget = parseFloat(document.getElementById('budget-input').value) || (l.budget || 0);
-  var spent  = l.items.length ? (l.items[0].amt || 0) : 0;
-  var rem    = budget - spent;
-  var over   = rem < 0;
 
-  document.getElementById('bs-budget').textContent    = fmt(budget);
-  document.getElementById('bs-spent').textContent     = fmt(spent);
-  document.getElementById('bs-remaining').textContent = fmt(Math.abs(rem));
+  var budget = parseFloat(document.getElementById('budget-input').value);
+  if (isNaN(budget)) budget = (l.budget || 0);
 
-  var remCell  = document.getElementById('bs-rem-cell');
-  var remLabel = document.getElementById('bs-rem-label');
-  remCell.classList.toggle('over', over);
-  remLabel.textContent = over ? 'Over by' : 'Remaining';
+  var spent = l.items.length ? (l.items[0].amt || 0) : 0;
+  var rem   = budget - spent;
+  var over  = rem < 0;
+
+  var bd = document.getElementById('bd-budget');
+  if (bd) bd.textContent = fmt(budget);
+
+  var line2 = document.getElementById('bd-line2');
+  if (line2) {
+    if (budget <= 0) {
+      line2.textContent = fmt(spent) + ' spent';
+    } else if (over) {
+      line2.textContent = fmt(Math.abs(rem)) + ' over · ' + fmt(spent) + ' spent';
+    } else {
+      line2.textContent = fmt(spent) + ' spent · ' + fmt(rem) + ' left';
+    }
+  }
+
+  // tiny progress bar
+  var fill = document.getElementById('bd-fill');
+  if (fill) {
+    var pct = 0;
+    if (budget > 0) pct = Math.min(1, spent / budget) * 100;
+    fill.style.width = pct.toFixed(1) + '%';
+  }
 }
 
 function recalcTotal() {
@@ -537,6 +581,23 @@ function recalcTotal() {
 
 function selectAll()   { var l=GL(); if(!l) return; l.items.slice(1).forEach(function(i){ i.done=true;  }); recalcTotal(); save(); renderList(); }
 function deselectAll() { var l=GL(); if(!l) return; l.items.slice(1).forEach(function(i){ i.done=false; }); recalcTotal(); save(); renderList(); }
+
+function toggleAllFromTotal() {
+  var l = GL(); if (!l) return;
+  var items = l.items.slice(1);
+  if (!items.length) return;
+  var allDone = items.every(function(i){ return i.done; });
+  if (allDone) { deselectAll(); } else { selectAll(); }
+}
+
+function clearNewRow() {
+  ['nr-name','nr-amt','nr-qty','nr-unit'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  var n = document.getElementById('nr-name');
+  if (n) n.focus();
+}
 
 function numField(val, onchange) {
   return '<input class="num-inp" type="text" inputmode="decimal" pattern="[0-9]*\\.?[0-9]*"'
@@ -551,6 +612,7 @@ function renderList() {
   var b = document.getElementById('lv-body');
   var pinned = l.items.length ? l.items[0] : null;
   var rest   = l.items.slice(1);
+  var allDone = !!(rest.length && rest.every(function(i){ return i.done; }));
   var html   = '<table>';
 
   // Headers
@@ -572,14 +634,20 @@ function renderList() {
   if (pinned) {
     if (qtyMode) {
       html += '<tr class="tbl-total">'
-        + '<td class="col-name"><input class="cell-inp" value="' + esc(pinned.name) + '" onchange="updateName(\'' + pinned.id + '\',this.value)"></td>'
+        + '<td class="col-name"><div class="name-cell">'
+        + '<div class="check total-check' + (allDone?' on':'') + '" onclick="toggleAllFromTotal()">' + (allDone?'✓':'') + '</div>'
+        + '<input class="cell-inp" value="' + esc(pinned.name) + '" onchange="updateName(\'' + pinned.id + '\',this.value)">'
+        + '</div></td>'
         + '<td class="col-qty"></td><td class="col-unit"></td>'
         + '<td class="col-amt">' + numField(pinned.amt, 'updateAmt(\'' + pinned.id + '\',this.value)') + '</td>'
         + '<td class="col-del"><button class="xbtn" onclick="delItem(\'' + pinned.id + '\')">✕</button></td>'
         + '</tr>';
     } else {
       html += '<tr class="tbl-total">'
-        + '<td class="col-name"><input class="cell-inp" value="' + esc(pinned.name) + '" onchange="updateName(\'' + pinned.id + '\',this.value)"></td>'
+        + '<td class="col-name"><div class="name-cell">'
+        + '<div class="check total-check' + (allDone?' on':'') + '" onclick="toggleAllFromTotal()">' + (allDone?'✓':'') + '</div>'
+        + '<input class="cell-inp" value="' + esc(pinned.name) + '" onchange="updateName(\'' + pinned.id + '\',this.value)">'
+        + '</div></td>'
         + '<td class="col-amt">' + numField(pinned.amt, 'updateAmt(\'' + pinned.id + '\',this.value)') + '</td>'
         + '<td class="col-del"><button class="xbtn" onclick="delItem(\'' + pinned.id + '\')">✕</button></td>'
         + '</tr>';
@@ -615,15 +683,16 @@ function renderList() {
       + '<td class="col-qty"><input class="num-inp" id="nr-qty" type="text" inputmode="decimal" placeholder="0" oninput="calcNewRow()" onkeydown="nrKey(event,\'qty\')" onkeyup="nrKey(event,\'qty\')"></td>'
       + '<td class="col-unit"><input class="num-inp" id="nr-unit" type="text" inputmode="decimal" placeholder="0" oninput="calcNewRow()" onkeydown="nrKey(event,\'unit\')" onkeyup="nrKey(event,\'unit\')"></td>'
       + '<td class="col-amt"><input class="num-inp" id="nr-amt" type="text" inputmode="decimal" placeholder="0" onkeydown="nrKey(event,\'amt\')" onkeyup="nrKey(event,\'amt\')"></td>'
-      + '<td class="col-del"><button class="add-row-btn" onclick="commitNewRow()" title="Add">+</button></td></tr>';
+      + '<td class="col-del"><button class="xbtn nr-clear" onclick="clearNewRow()" title="Clear">✕</button></td></tr>';
   } else {
     html += '<tr class="new-row">'
       + '<td class="col-name"><input class="cell-inp" id="nr-name" placeholder="New item…" onkeydown="nrKey(event,\'name\')" onkeyup="nrKey(event,\'name\')"></td>'
       + '<td class="col-amt"><input class="num-inp" id="nr-amt" type="text" inputmode="decimal" placeholder="0" onkeydown="nrKey(event,\'amt\')" onkeyup="nrKey(event,\'amt\')"></td>'
-      + '<td class="col-del"><button class="add-row-btn" onclick="commitNewRow()" title="Add">+</button></td></tr>';
+      + '<td class="col-del"><button class="xbtn nr-clear" onclick="clearNewRow()" title="Clear">✕</button></td></tr>';
   }
 
-  html += '</table>';
+  html += '</table>'
+    + '<div class="below-add"><button class="below-add-btn" onclick="commitNewRow()" title="Add">+</button></div>';
   b.innerHTML = html;
 }
 
