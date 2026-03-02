@@ -60,74 +60,50 @@ body.dark .toggle-thumb { transform:translateX(16px); }
 
 
 /* ── BUDGET BAR ── */
-#budget-mini{
-  display:none;
-  flex-basis:100%;
-  width:100%;
-  padding:10px 0 0;
+#budget-mini {
+  display: none; flex-basis: 100%; width: 100%; padding: 10px 0 0;
 }
-#budget-mini.visible{ display:block; }
-
-.budget-min { display:flex; flex-direction:column; gap:6px; }
-
-.budget-line1 {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  display:flex;
-  align-items:center;
-  gap:8px;
-  cursor:pointer;
-  -webkit-user-select:none;
+#budget-mini.visible { display: block; }
+.budget-min { display: flex; flex-direction: column; gap: 5px; }
+.bd-row {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 13px; font-family: inherit; line-height: 1.2;
 }
-.budget-line1 .budget-edit { color: var(--muted); font-weight: 700; font-size: 12px; }
-
-.budget-line2 {
-  font-size: 13px;
-  color: var(--muted);
+.bd-lhs { color: var(--muted); }
+.bd-mid {
+  color: var(--text); font-weight: 700;
+  cursor: pointer; -webkit-user-select: none;
+  display: flex; align-items: center; gap: 4px;
 }
-
-.budget-edit-row {
-  display:none;
-  align-items:center;
-  gap:8px;
-  margin-top:2px;
+.bd-mid .bd-edit { color: var(--muted); font-size: 11px; font-weight: 400; }
+.bd-rhs { color: var(--green); font-weight: 600; }
+.bd-rhs.over { color: var(--red); }
+.bd-row-act .bd-mid { color: var(--muted); font-weight: 500; cursor: default; }
+.budget-bar-track {
+  height: 5px; border-radius: 999px;
+  background: var(--border); overflow: hidden; display: flex;
 }
-#budget-mini.editing .budget-edit-row { display:flex; }
-
+.bd-seg-actual {
+  height: 100%; width: 0%; flex-shrink: 0;
+  background: var(--green); transition: width 0.3s ease;
+}
+.bd-seg-forecast {
+  height: 100%; width: 0%; flex-shrink: 0;
+  background: var(--accent); transition: width 0.3s ease;
+}
+.bd-seg-actual.over, .bd-seg-forecast.over { background: var(--red); }
+.budget-edit-row { display: none; align-items: center; gap: 8px; }
+#budget-mini.editing .budget-edit-row { display: flex; }
 .budget-edit-row label {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--muted);
-  white-space: nowrap;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
+  font-size: 12px; font-weight: 600; color: var(--muted);
+  white-space: nowrap; text-transform: uppercase; letter-spacing: 0.3px;
 }
 .budget-edit-row input {
-  flex: 0 0 160px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--white);
-  color: var(--text);
-  font-size: 16px;
-  font-family: inherit;
-  padding: 8px 12px;
-  outline: none;
-  -webkit-appearance: none;
+  flex: 0 0 150px; border: 1px solid var(--border); border-radius: 10px;
+  background: var(--white); color: var(--text); font-size: 16px;
+  font-family: inherit; padding: 8px 12px; outline: none; -webkit-appearance: none;
 }
 .budget-edit-row input:focus { border-color: #888; }
-
-.budget-bar-track{
-  height:4px;
-  border-radius:999px;
-  background: var(--border);
-  overflow:hidden;
-}
-.budget-bar-fill{
-  height:100%;
-  width:0%;
-  background: var(--accent);
-}
 
 
 /* ── CONTENT ── */
@@ -194,7 +170,7 @@ table { width:100%; border-collapse:collapse; background:var(--white); }
 .num-inp::placeholder { color:var(--border); font-weight:400; }
 
 .tbl-total .cell-inp { font-weight:700; padding:14px 14px; }
-.tbl-total .num-inp  { font-weight:700; padding:14px 8px; }
+.tbl-total .num-inp  { font-weight:700; padding:14px 8px; pointer-events:none; user-select:none; }
 
 .name-cell { display:flex; align-items:center; }
 .tbl-total .name-cell { align-items:center; }
@@ -231,10 +207,12 @@ textarea.inp { min-height:120px; resize:none; font-family:'Menlo',monospace; fon
 .action-bar { padding:10px 16px calc(var(--safe-bottom) + 10px); background:var(--bg); border-top:1px solid var(--border); display:flex; justify-content:flex-end; }
 
 /* minimal additions */
-.total-check { margin-left:0 !important; margin-right:10px; }
+.total-check { margin-left:12px !important; margin-right:0 !important; }
 .nr-clear { color: var(--border); }
 .below-add { display:flex; justify-content:flex-end; padding:10px 14px 0; }
 .below-add-btn { background:var(--accent); border:none; color:var(--bg); font-size:22px; font-weight:800; cursor:pointer; width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center; }
+.csv-btn { background:var(--white); border:1px solid var(--border); color:var(--muted); font-size:11px; font-weight:700; cursor:pointer; height:28px; padding:0 10px; border-radius:8px; font-family:inherit; letter-spacing:0.3px; text-transform:uppercase; display:flex; align-items:center; transition:all 0.12s; }
+.csv-btn:active { opacity:0.6; }
 
 </style>
 </head>
@@ -273,26 +251,31 @@ textarea.inp { min-height:120px; resize:none; font-family:'Menlo',monospace; fon
   <!-- TOOLBAR with Budget pill -->
   <div class="toolbar">
     <button class="pill" id="btn-qty" onclick="toggleQtyMode()">Qty + Unit</button>
-<button class="pill" id="btn-budget" onclick="toggleBudget()">💰 Budget</button>
+<button class="pill" id="btn-budget" onclick="toggleBudget()"> Budget</button>
     <button class="pill" onclick="showModal('m-addcat')" style="margin-left:auto;">+ Category</button>
   
 
-    <!-- BUDGET MINI (minimal) -->
+    <!-- BUDGET MINI -->
       <div id="budget-mini">
         <div class="budget-min">
-          <div class="budget-line1" onclick="enterBudgetEdit()">
-            💰 <span>Budget:</span> <span id="bd-budget">£0</span> <span class="budget-edit">✎</span>
+          <div class="bd-row">
+            <span class="bd-lhs" id="bd-fore-lhs">£0 forecast</span>
+            <span class="bd-mid" onclick="enterBudgetEdit()">Budget: <span id="bd-budget">£0</span><span class="bd-edit"> ✎</span></span>
+            <span class="bd-rhs" id="bd-fore-rhs"></span>
           </div>
-          <div class="budget-line2" id="bd-line2">£0 spent · £0 left</div>
-    
           <div class="budget-edit-row">
-            <label>Budget</label>
+            <label>Budget £</label>
             <input type="text" inputmode="decimal" id="budget-input" placeholder="0.00" oninput="saveBudget()" onchange="saveBudget()">
             <button class="ghost-btn" onclick="exitBudgetEdit()">Done</button>
           </div>
-    
           <div class="budget-bar-track" aria-hidden="true">
-            <div class="budget-bar-fill" id="bd-fill"></div>
+            <div class="bd-seg-actual"   id="bd-seg-actual"></div>
+            <div class="bd-seg-forecast" id="bd-seg-forecast"></div>
+          </div>
+          <div class="bd-row bd-row-act">
+            <span class="bd-lhs" id="bd-act-lhs">£0 actual</span>
+            <span class="bd-mid">&#10003; Actual</span>
+            <span class="bd-rhs" id="bd-act-rhs"></span>
           </div>
         </div>
       </div>
@@ -300,8 +283,9 @@ textarea.inp { min-height:120px; resize:none; font-family:'Menlo',monospace; fon
 
   
   <div class="content" id="lv-body"></div>
-  <div class="action-bar">
-    <button onclick="showModal('m-additem')" style="width:44px;height:44px;border-radius:13px;background:var(--accent);color:var(--bg);border:none;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✏️</button>
+  <div class="action-bar" style="flex-direction:column;align-items:flex-end;gap:8px;">
+    <button class="csv-btn" onclick="exportCSV()">&#8595; CSV</button>
+    <button onclick="showModal('m-additem')" style="width:44px;height:44px;border-radius:13px;background:var(--accent);color:var(--bg);border:none;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#9998;</button>
   </div>
 </div>
 
@@ -541,34 +525,53 @@ function saveBudget() {
 
 function updateBudgetBar() {
   var l = GL(); if (!l) return;
-
   var budget = parseFloat(document.getElementById('budget-input').value);
   if (isNaN(budget)) budget = (l.budget || 0);
 
-  var spent = l.items.length ? (l.items[0].amt || 0) : 0;
-  var rem   = budget - spent;
-  var over  = rem < 0;
+  // forecast = unchecked items sum (what items[0].amt holds)
+  var forecast = l.items.length ? (l.items[0].amt || 0) : 0;
+  // actual = checked items sum only
+  var actual = Math.round(l.items.slice(1).filter(function(i){ return i.done; })
+    .reduce(function(s,i){ return s+(i.amt||0); },0)*100)/100;
+  var combined = Math.round((actual+forecast)*100)/100;
+  var fRem = budget - combined;
+  var aRem = budget - actual;
+  var fOver = fRem < 0;
+  var aOver = aRem < 0;
 
   var bd = document.getElementById('bd-budget');
   if (bd) bd.textContent = fmt(budget);
 
-  var line2 = document.getElementById('bd-line2');
-  if (line2) {
-    if (budget <= 0) {
-      line2.textContent = fmt(spent) + ' spent';
-    } else if (over) {
-      line2.textContent = fmt(Math.abs(rem)) + ' over · ' + fmt(spent) + ' spent';
-    } else {
-      line2.textContent = fmt(spent) + ' spent · ' + fmt(rem) + ' left';
-    }
+  var fLhs = document.getElementById('bd-fore-lhs');
+  if (fLhs) fLhs.textContent = fmt(forecast) + ' forecast';
+  var fRhs = document.getElementById('bd-fore-rhs');
+  if (fRhs) {
+    fRhs.textContent = budget<=0 ? '' : fOver ? fmt(Math.abs(fRem))+' over' : fmt(fRem)+' left';
+    fRhs.className = 'bd-rhs'+(fOver?' over':'');
+  }
+  var aLhs = document.getElementById('bd-act-lhs');
+  if (aLhs) aLhs.textContent = fmt(actual) + ' actual';
+  var aRhs = document.getElementById('bd-act-rhs');
+  if (aRhs) {
+    aRhs.textContent = budget<=0 ? '' : aOver ? fmt(Math.abs(aRem))+' over' : fmt(aRem)+' left';
+    aRhs.className = 'bd-rhs'+(aOver?' over':'');
   }
 
-  // tiny progress bar
-  var fill = document.getElementById('bd-fill');
-  if (fill) {
-    var pct = 0;
-    if (budget > 0) pct = Math.min(1, spent / budget) * 100;
-    fill.style.width = pct.toFixed(1) + '%';
+  // dual bar: green=actual, dark=forecast — mutually exclusive, just sit side by side
+  var segA = document.getElementById('bd-seg-actual');
+  var segF = document.getElementById('bd-seg-forecast');
+  if (segA && segF) {
+    if (budget > 0) {
+      var aPct = Math.min(actual/budget,1)*100;
+      var fPct = Math.min(forecast/budget,1)*100;
+      if (aPct+fPct > 100) fPct = 100-aPct;
+      segA.style.width = aPct.toFixed(1)+'%';
+      segF.style.width = fPct.toFixed(1)+'%';
+      segA.className = 'bd-seg-actual'+(aOver?' over':'');
+      segF.className = 'bd-seg-forecast'+(fOver?' over':'');
+    } else {
+      segA.style.width = '0%'; segF.style.width = '0%';
+    }
   }
 }
 
@@ -636,20 +639,20 @@ function renderList() {
       html += '<tr class="tbl-total">'
         + '<td class="col-name"><div class="name-cell">'
         + '<div class="check total-check' + (allDone?' on':'') + '" onclick="toggleAllFromTotal()">' + (allDone?'✓':'') + '</div>'
-        + '<input class="cell-inp" value="' + esc(pinned.name) + '" onchange="updateName(\'' + pinned.id + '\',this.value)">'
+        + '<span class="cell-inp" style="font-weight:700;padding:14px 14px;display:block;">' + esc(pinned.name) + '</span>'
         + '</div></td>'
         + '<td class="col-qty"></td><td class="col-unit"></td>'
-        + '<td class="col-amt">' + numField(pinned.amt, 'updateAmt(\'' + pinned.id + '\',this.value)') + '</td>'
-        + '<td class="col-del"><button class="xbtn" onclick="delItem(\'' + pinned.id + '\')">✕</button></td>'
+        + '<td class="col-amt">' + numField(pinned.amt, '') + '</td>'
+        + '<td class="col-del"></td>'
         + '</tr>';
     } else {
       html += '<tr class="tbl-total">'
         + '<td class="col-name"><div class="name-cell">'
         + '<div class="check total-check' + (allDone?' on':'') + '" onclick="toggleAllFromTotal()">' + (allDone?'✓':'') + '</div>'
-        + '<input class="cell-inp" value="' + esc(pinned.name) + '" onchange="updateName(\'' + pinned.id + '\',this.value)">'
+        + '<span class="cell-inp" style="font-weight:700;padding:14px 14px;display:block;">' + esc(pinned.name) + '</span>'
         + '</div></td>'
-        + '<td class="col-amt">' + numField(pinned.amt, 'updateAmt(\'' + pinned.id + '\',this.value)') + '</td>'
-        + '<td class="col-del"><button class="xbtn" onclick="delItem(\'' + pinned.id + '\')">✕</button></td>'
+        + '<td class="col-amt">' + numField(pinned.amt, '') + '</td>'
+        + '<td class="col-del"></td>'
         + '</tr>';
     }
   }
@@ -848,6 +851,24 @@ function doAddPaste() {
     l.items.push({id:uid(),name:name,amt:amt,qty:0,unit:0,cat:cat,done:false});
   });
   recalcTotal(); save(); closeModals(); renderList();
+}
+
+function exportCSV() {
+  var l = GL(); if (!l) return;
+  var rows = [['Name','Amount','Qty','Unit Price','Done']];
+  l.items.slice(1).forEach(function(i) {
+    rows.push(['"'+((i.name||'').replace(/"/g,'""'))+'"',i.amt||0,i.qty||'',i.unit||'',i.done?'Yes':'No']);
+  });
+  var tot = l.items[0];
+  rows.push(['"'+((tot?(tot.name||'Total'):'Total').replace(/"/g,'""'))+'"',tot?(tot.amt||0):0,'','','']);
+  var sep = '\r\n';
+  var csv = rows.map(function(r){return r.join(',');}).join(sep);
+  var blob = new Blob([csv],{type:'text/csv'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href=url; a.download=((l.name||'list').replace(/[^a-z0-9]/gi,'_'))+'.csv';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
 document.getElementById('nl-name').addEventListener('keydown',function(e){ if(e.key==='Enter') doCreateList(); });
