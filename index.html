@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Lists">
@@ -10,118 +10,153 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 :root {
-  --bg: #f7f7f2; --white: #fff; --border: #e2e2dc;
-  --text: #111; --muted: #999; --bold-row: #efefea;
-  --accent: #111; --green: #2d7a4f; --new-row: #fafaf6;
-  --safe-top: env(safe-area-inset-top,44px); --safe-bottom: env(safe-area-inset-bottom,20px);
+  --bg: #f5f5f0; --white: #ffffff; --border: #e2e2dc;
+  --text: #111; --muted: #aaa; --row-alt: #fafaf8;
+  --accent: #111; --green: #2d7a4f;
+  --safe-top: env(safe-area-inset-top,44px);
+  --safe-bottom: env(safe-area-inset-bottom,20px);
 }
 body.dark {
   --bg: #141418; --white: #1e1e24; --border: #2e2e38;
-  --text: #f0ede6; --muted: #666; --bold-row: #252530;
-  --accent: #f0ede6; --green: #3a9e65; --new-row: #191920;
+  --text: #f0ede6; --muted: #555; --row-alt: #191920;
+  --accent: #f0ede6; --green: #3a9e65;
 }
-body { font-family: -apple-system,'SF Pro Text',sans-serif; background: var(--bg); color: var(--text); min-height:100vh; transition: background 0.2s, color 0.2s; }
-
+body {
+  font-family: -apple-system, 'SF Pro Text', sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100vh; min-height: -webkit-fill-available;
+  font-size: 16px; overflow-x: hidden;
+}
 .screen { display:none; flex-direction:column; min-height:100vh; }
 .screen.active { display:flex; }
 
-/* HEADER */
-.header { padding: calc(var(--safe-top) + 10px) 16px 12px; background:var(--bg); position:sticky; top:0; z-index:10; border-bottom:1px solid var(--border); }
+/* ── HEADER ── */
+.header {
+  padding: calc(var(--safe-top) + 8px) 16px 12px;
+  background: var(--bg); position: sticky; top: 0; z-index: 10;
+  border-bottom: 1px solid var(--border);
+}
 .header-row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.header h1 { font-size:26px; font-weight:700; letter-spacing:-0.5px; }
+.header h1 { font-size:24px; font-weight:700; letter-spacing:-0.5px; }
 .header-sub { font-size:12px; color:var(--muted); margin-top:3px; }
-.back-btn { background:none; border:none; color:var(--accent); font-size:15px; font-weight:500; cursor:pointer; padding:0; white-space:nowrap; }
-.hdr-title { font-size:17px; font-weight:700; flex:1; text-align:center; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.text-btn { background:none; border:none; color:var(--muted); font-size:13px; cursor:pointer; padding:0; font-family:inherit; white-space:nowrap; }
+.back-btn { background:none; border:none; color:var(--accent); font-size:16px; font-weight:500; cursor:pointer; padding:8px 0; min-width:60px; }
+.hdr-title { font-size:17px; font-weight:700; flex:1; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ghost-btn { background:none; border:none; color:var(--muted); font-size:13px; cursor:pointer; padding:8px 0; font-family:inherit; white-space:nowrap; }
 
-/* DARK TOGGLE */
-.dark-toggle { display:flex; align-items:center; gap:6px; cursor:pointer; -webkit-user-select:none; }
-.dark-toggle span { font-size:13px; color:var(--muted); }
-.toggle-track {
-  width:36px; height:20px; border-radius:10px; background:var(--border);
-  position:relative; transition:background 0.2s; flex-shrink:0;
-}
+/* dark toggle */
+.toggle-wrap { display:flex; align-items:center; gap:6px; cursor:pointer; -webkit-user-select:none; padding:4px; }
+.toggle-track { width:40px; height:24px; border-radius:12px; background:var(--border); position:relative; transition:background 0.2s; flex-shrink:0; }
 body.dark .toggle-track { background:#4a9eff; }
-.toggle-thumb {
-  position:absolute; top:2px; left:2px; width:16px; height:16px;
-  border-radius:50%; background:#fff; transition:transform 0.2s;
-  box-shadow:0 1px 3px rgba(0,0,0,0.3);
-}
+.toggle-thumb { position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff; transition:transform 0.2s; box-shadow:0 1px 4px rgba(0,0,0,0.25); }
 body.dark .toggle-thumb { transform:translateX(16px); }
 
-/* TOOLBAR (list view second row) */
-.toolbar { display:flex; align-items:center; gap:8px; padding:8px 16px; border-bottom:1px solid var(--border); background:var(--bg); flex-wrap:wrap; }
-.pill-btn {
-  padding:5px 12px; border-radius:20px; border:1px solid var(--border);
-  background:var(--white); color:var(--muted); font-size:12px; font-weight:500;
-  cursor:pointer; font-family:inherit; white-space:nowrap; transition:all 0.12s;
+/* ── TOOLBAR ── */
+.toolbar {
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  padding:10px 16px; border-bottom:1px solid var(--border); background:var(--bg);
 }
-.pill-btn.on { background:var(--accent); color:var(--bg); border-color:var(--accent); }
+.pill { padding:8px 14px; border-radius:20px; border:1px solid var(--border); background:var(--white); color:var(--muted); font-size:13px; font-weight:500; cursor:pointer; font-family:inherit; white-space:nowrap; -webkit-user-select:none; transition:all 0.12s; }
+.pill.on { background:var(--accent); color:var(--bg); border-color:var(--accent); }
 
-/* CONTENT */
-.content { flex:1; overflow-y:auto; padding:12px 14px calc(var(--safe-bottom) + 76px); }
+/* ── CONTENT ── */
+.content { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0 0 8px; }
 
-/* HOME CARDS */
-.list-card { background:var(--white); border-radius:12px; padding:15px 16px; margin-bottom:9px; display:flex; align-items:center; border:1px solid var(--border); cursor:pointer; -webkit-user-select:none; transition:opacity 0.1s; }
+/* ── HOME CARDS ── */
+.list-card { background:var(--white); border-bottom:1px solid var(--border); padding:16px; display:flex; align-items:center; cursor:pointer; -webkit-user-select:none; transition:opacity 0.1s; }
+.list-card:first-child { margin-top:12px; border-radius:12px 12px 0 0; margin:12px 14px 0; border:1px solid var(--border); }
+.list-card + .list-card { margin:0 14px; border-top:none; border-left:1px solid var(--border); border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
+.list-card:last-child { border-radius:0 0 12px 12px; margin-bottom:10px; }
+.list-card:only-child { border-radius:12px; margin:12px 14px; border:1px solid var(--border); }
 .list-card:active { opacity:0.5; }
 .lc-info { flex:1; }
-.lc-name { font-size:16px; font-weight:600; }
-.lc-meta { font-size:12px; color:var(--muted); margin-top:2px; }
+.lc-name { font-size:17px; font-weight:600; }
+.lc-meta { font-size:13px; color:var(--muted); margin-top:3px; }
 .lc-right { display:flex; align-items:center; gap:8px; }
-.lc-total { font-size:17px; font-weight:700; }
-.lc-arrow { color:var(--muted); font-size:18px; }
-.del-btn { background:none; border:none; color:var(--muted); font-size:16px; cursor:pointer; padding:2px 6px; }
+.lc-total { font-size:18px; font-weight:700; }
+.lc-arrow { color:var(--muted); font-size:20px; }
+.del-btn { background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; padding:6px 8px; }
 
-/* TABLE */
-.tbl-card { background:var(--white); border-radius:12px; border:1px solid var(--border); overflow:hidden; }
-table { width:100%; border-collapse:collapse; }
-.tbl-head { background:var(--bold-row); }
-.tbl-head td { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; padding:9px 10px; }
-.tbl-total { background:var(--bold-row); }
-.tbl-total td { font-weight:700; font-size:15px; padding:12px 10px; border-bottom:2px solid var(--border); }
-.tbl-row td { padding:11px 10px; font-size:15px; border-bottom:1px solid var(--border); }
+/* ── TABLE (no card frame — matches header bg) ── */
+table { width:100%; border-collapse:collapse; background:var(--white); }
+
+.tbl-head td {
+  font-size:11px; font-weight:700; color:var(--muted);
+  text-transform:uppercase; letter-spacing:0.5px;
+  padding:10px 14px; background:var(--bg);
+  border-bottom:1px solid var(--border);
+}
+
+/* pinned total row */
+.tbl-total { background:var(--bg); }
+.tbl-total td { border-bottom:2px solid var(--border); }
+
+/* normal rows */
+.tbl-row td { border-bottom:1px solid var(--border); background:var(--white); }
 .tbl-row:last-child td { border-bottom:none; }
-.new-row td { padding:10px 10px; border-top:2px dashed var(--border); background:var(--new-row); }
+.tbl-row:nth-child(even) td { background:var(--row-alt); }
 
-.col-name { width:40%; }
-.col-qty  { width:14%; text-align:right; }
-.col-unit { width:14%; text-align:right; }
-.col-amt  { width:16%; text-align:right; font-weight:600; }
-.col-del  { width:28px; text-align:right; padding-right:10px !important; }
+/* new row */
+.new-row td { border-top:2px dashed var(--border); background:var(--bg); }
 
-.check { width:20px; height:20px; border-radius:50%; border:2px solid var(--border); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-size:11px; color:#fff; flex-shrink:0; transition:all 0.12s; -webkit-user-select:none; }
-.check.on { background:var(--green); border-color:var(--green); }
-.xbtn { background:none; border:none; color:var(--border); font-size:15px; cursor:pointer; padding:0; }
+/* column sizing */
+.col-name { width:auto; }
+.col-qty  { width:60px; }
+.col-unit { width:68px; }
+.col-amt  { width:80px; }
+.col-del  { width:36px; }
 
-.cell-inp { width:100%; border:none; background:transparent; font-size:15px; font-family:inherit; color:var(--text); outline:none; padding:0; }
+/* inputs inside cells — full touch target */
+.cell-inp {
+  display:block; width:100%; border:none; background:transparent;
+  font-size:16px; font-family:inherit; color:var(--text);
+  outline:none; padding:14px 14px;
+}
 .cell-inp::placeholder { color:var(--border); }
-.num-inp { width:100%; border:none; background:transparent; font-size:15px; font-family:inherit; color:var(--text); font-weight:600; outline:none; padding:0; text-align:right; -webkit-appearance:none; appearance:none; }
-.num-inp::placeholder { color:var(--border); font-weight:400; }
-.tbl-total .num-inp { font-weight:700; }
-.done-text { text-decoration:line-through; color:var(--muted); }
 
-/* FAB */
-.fab { position:fixed; bottom:calc(var(--safe-bottom) + 18px); right:18px; width:50px; height:50px; border-radius:14px; background:var(--accent); color:var(--bg); border:none; font-size:26px; cursor:pointer; z-index:20; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 14px rgba(0,0,0,0.2); transition:transform 0.1s; }
+.num-inp {
+  display:block; width:100%; border:none; background:transparent;
+  font-size:16px; font-family:inherit; color:var(--text); font-weight:600;
+  outline:none; padding:14px 8px; text-align:right;
+  -webkit-appearance:none; appearance:none;
+}
+.num-inp::placeholder { color:var(--border); font-weight:400; }
+
+.tbl-total .cell-inp { font-weight:700; padding:15px 14px; }
+.tbl-total .num-inp  { font-weight:700; padding:15px 8px; }
+
+.name-cell { display:flex; align-items:center; }
+.check {
+  flex-shrink:0; margin-left:12px;
+  width:24px; height:24px; border-radius:50%; border:2px solid var(--border);
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:12px; color:#fff; transition:all 0.12s; -webkit-user-select:none;
+}
+.check.on { background:var(--green); border-color:var(--green); }
+.xbtn { background:none; border:none; color:var(--border); font-size:16px; cursor:pointer; width:36px; height:48px; display:flex; align-items:center; justify-content:center; }
+.add-row-btn { background:var(--accent); border:none; color:var(--bg); font-size:20px; font-weight:700; cursor:pointer; width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin:0 auto; }
+
+/* ── FAB ── */
+.fab { position:fixed; bottom:calc(var(--safe-bottom) + 20px); right:18px; width:54px; height:54px; border-radius:16px; background:var(--accent); color:var(--bg); border:none; font-size:28px; cursor:pointer; z-index:20; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 16px rgba(0,0,0,0.2); transition:transform 0.1s; }
 .fab:active { transform:scale(0.92); }
 
-/* MODAL */
+/* ── MODAL ── */
 .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:100; align-items:flex-end; }
 .overlay.open { display:flex; }
 .modal { background:var(--white); border-radius:20px 20px 0 0; padding:20px 20px calc(var(--safe-bottom) + 16px); width:100%; animation:up 0.22s ease; max-height:88vh; overflow-y:auto; }
 @keyframes up { from{transform:translateY(100%)} to{transform:translateY(0)} }
-.modal-title { font-size:16px; font-weight:700; margin-bottom:14px; }
+.modal-title { font-size:17px; font-weight:700; margin-bottom:16px; }
 .seg { display:flex; border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:14px; }
-.seg-btn { flex:1; padding:10px; font-size:14px; font-weight:500; cursor:pointer; border:none; background:var(--white); color:var(--muted); font-family:inherit; }
+.seg-btn { flex:1; padding:12px; font-size:15px; font-weight:500; cursor:pointer; border:none; background:var(--white); color:var(--muted); font-family:inherit; }
 .seg-btn.on { background:var(--accent); color:var(--bg); }
 .pane { display:none; } .pane.on { display:block; }
-.inp { width:100%; padding:13px 14px; background:var(--bg); border:1px solid var(--border); border-radius:11px; font-size:16px; color:var(--text); font-family:inherit; outline:none; margin-bottom:9px; -webkit-appearance:none; }
+.inp { width:100%; padding:14px 16px; background:var(--bg); border:1px solid var(--border); border-radius:12px; font-size:16px; color:var(--text); font-family:inherit; outline:none; margin-bottom:10px; -webkit-appearance:none; }
 .inp:focus { border-color:#888; }
-.row2 { display:flex; gap:8px; margin-bottom:9px; } .row2 .inp { margin-bottom:0; }
-textarea.inp { min-height:120px; resize:none; font-family:'Menlo',monospace; font-size:13px; line-height:1.7; }
-.hint { font-size:12px; color:var(--muted); line-height:1.55; margin-bottom:10px; }
-.btn-ok { width:100%; padding:14px; background:var(--accent); color:var(--bg); border:none; border-radius:11px; font-size:16px; font-weight:600; cursor:pointer; font-family:inherit; }
-.btn-no { width:100%; padding:12px; background:none; color:var(--muted); border:none; border-radius:11px; font-size:15px; cursor:pointer; font-family:inherit; margin-top:5px; }
-.empty { text-align:center; color:var(--muted); padding:60px 20px; font-size:14px; line-height:1.7; }
+.row2 { display:flex; gap:8px; margin-bottom:10px; } .row2 .inp { margin-bottom:0; }
+textarea.inp { min-height:120px; resize:none; font-family:'Menlo',monospace; font-size:14px; line-height:1.7; }
+.hint { font-size:13px; color:var(--muted); line-height:1.55; margin-bottom:10px; }
+.btn-ok { width:100%; padding:15px; background:var(--accent); color:var(--bg); border:none; border-radius:12px; font-size:17px; font-weight:600; cursor:pointer; font-family:inherit; }
+.btn-no { width:100%; padding:14px; background:none; color:var(--muted); border:none; border-radius:12px; font-size:16px; cursor:pointer; font-family:inherit; margin-top:6px; }
+.empty { text-align:center; color:var(--muted); padding:60px 20px; font-size:15px; line-height:1.7; }
 </style>
 </head>
 <body>
@@ -132,11 +167,11 @@ textarea.inp { min-height:120px; resize:none; font-family:'Menlo',monospace; fon
     <div class="header-row">
       <h1>My Lists</h1>
       <div style="display:flex;align-items:center;gap:10px;">
-        <div class="dark-toggle" onclick="toggleDark()">
-          <span id="dark-label">☀️</span>
+        <div class="toggle-wrap" onclick="toggleDark()">
+          <span id="dark-label" style="font-size:16px;">☀️</span>
           <div class="toggle-track"><div class="toggle-thumb"></div></div>
         </div>
-        <button class="fab" style="position:relative;bottom:auto;right:auto;width:34px;height:34px;border-radius:9px;font-size:20px;box-shadow:none;" onclick="showModal('m-newlist')">+</button>
+        <button class="fab" style="position:relative;bottom:auto;right:auto;width:36px;height:36px;border-radius:10px;font-size:22px;box-shadow:none;" onclick="showModal('m-newlist')">+</button>
       </div>
     </div>
     <div class="header-sub" id="home-sub"></div>
@@ -150,19 +185,21 @@ textarea.inp { min-height:120px; resize:none; font-family:'Menlo',monospace; fon
     <div class="header-row">
       <button class="back-btn" onclick="goHome()">‹ Lists</button>
       <span class="hdr-title" id="lv-title"></span>
-      <div class="dark-toggle" onclick="toggleDark()" style="margin-left:4px;">
+      <div class="toggle-wrap" onclick="toggleDark()">
         <div class="toggle-track"><div class="toggle-thumb"></div></div>
       </div>
     </div>
   </div>
   <div class="toolbar">
-    <button class="pill-btn" id="btn-qty"      onclick="toggleQtyMode()">Qty + Unit</button>
-    <button class="pill-btn" id="btn-selall"   onclick="selectAll()">Select All</button>
-    <button class="pill-btn" id="btn-deselall" onclick="deselectAll()">Deselect All</button>
-    <button class="pill-btn" onclick="showModal('m-addcat')" style="margin-left:auto;">+ Category</button>
+    <button class="pill" id="btn-qty" onclick="toggleQtyMode()">Qty + Unit</button>
+    <button class="pill" onclick="selectAll()">Select All</button>
+    <button class="pill" onclick="deselectAll()">Deselect All</button>
+    <button class="pill" onclick="showModal('m-addcat')" style="margin-left:auto;">+ Category</button>
   </div>
   <div class="content" id="lv-body"></div>
-  <button class="fab" onclick="showModal('m-additem')">+</button>
+  <div style="padding:10px 16px calc(var(--safe-bottom) + 10px); background:var(--bg); border-top:1px solid var(--border); display:flex; justify-content:flex-end;">
+    <button onclick="showModal('m-additem')" style="width:44px;height:44px;border-radius:13px;background:var(--accent);color:var(--bg);border:none;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✏️</button>
+  </div>
 </div>
 
 <!-- MODAL: new list -->
@@ -196,7 +233,7 @@ textarea.inp { min-height:120px; resize:none; font-family:'Menlo',monospace; fon
     <div class="pane on" id="pane-manual">
       <input class="inp" id="mi-name" placeholder="Item name" maxlength="60">
       <div class="row2">
-        <input class="inp" id="mi-amt" placeholder="Amount" type="number" min="0">
+        <input class="inp" id="mi-amt" placeholder="Amount" type="text" inputmode="decimal">
         <select class="inp" id="mi-cat"></select>
       </div>
       <button class="btn-ok" onclick="doAddManual()">Add Item</button>
@@ -212,54 +249,52 @@ textarea.inp { min-height:120px; resize:none; font-family:'Menlo',monospace; fon
 </div>
 
 <script>
-let D       = JSON.parse(localStorage.getItem('ls5') || '{"lists":[]}');
-let CID     = null;
-let qtyMode = false;
+var D       = JSON.parse(localStorage.getItem('ls5') || '{"lists":[]}');
+var CID     = null;
+var qtyMode = false;
 
-const save = () => localStorage.setItem('ls5', JSON.stringify(D));
-const uid  = () => Date.now().toString(36) + Math.random().toString(36).slice(2,5);
-const esc  = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const GL   = () => D.lists.find(l => l.id === CID);
+function save() { localStorage.setItem('ls5', JSON.stringify(D)); }
+function uid()  { return Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function GL()   { return D.lists.find(function(l){ return l.id === CID; }); }
 
-// ── DARK MODE ──
+// DARK MODE
 function toggleDark() {
   document.body.classList.toggle('dark');
   localStorage.setItem('dark', document.body.classList.contains('dark') ? '1' : '0');
-  const lbl = document.getElementById('dark-label');
+  var lbl = document.getElementById('dark-label');
   if (lbl) lbl.textContent = document.body.classList.contains('dark') ? '🌙' : '☀️';
 }
-if (localStorage.getItem('dark') === '1') {
-  document.body.classList.add('dark');
-}
+if (localStorage.getItem('dark') === '1') document.body.classList.add('dark');
 
-// ── HOME ──
+// HOME
 function renderHome() {
   document.getElementById('home-sub').textContent = D.lists.length + ' list' + (D.lists.length !== 1 ? 's' : '');
-  const b = document.getElementById('home-body');
+  var b = document.getElementById('home-body');
   if (!D.lists.length) { b.innerHTML = '<div class="empty">No lists yet.<br>Tap + to create one.</div>'; return; }
-  b.innerHTML = D.lists.map(l => {
-    const total = l.items.length ? (l.items[0].amt||0) : 0;
-    const left  = l.items.slice(1).filter(i=>!i.done).length;
-    return `<div class="list-card" onclick="openList('${l.id}')">
-      <div class="lc-info">
-        <div class="lc-name">${esc(l.name)}</div>
-        <div class="lc-meta">${left} item${left!==1?'s':''} remaining</div>
-      </div>
-      <div class="lc-right">
-        <span class="lc-total">£${total}</span>
-        <span class="lc-arrow">›</span>
-        <button class="del-btn" onclick="event.stopPropagation();delList('${l.id}')">✕</button>
-      </div>
-    </div>`;
+  b.innerHTML = D.lists.map(function(l) {
+    var total = l.items.length ? (l.items[0].amt || 0) : 0;
+    var left  = l.items.slice(1).filter(function(i){ return !i.done; }).length;
+    return '<div class="list-card" onclick="openList(\'' + l.id + '\')">'
+      + '<div class="lc-info">'
+      + '<div class="lc-name">' + esc(l.name) + '</div>'
+      + '<div class="lc-meta">' + left + ' item' + (left!==1?'s':'') + ' remaining</div>'
+      + '</div>'
+      + '<div class="lc-right">'
+      + '<span class="lc-total">£' + total + '</span>'
+      + '<span class="lc-arrow">›</span>'
+      + '<button class="del-btn" onclick="event.stopPropagation();delList(\'' + l.id + '\')">✕</button>'
+      + '</div></div>';
   }).join('');
 }
 
 function delList(id) {
   if (!confirm('Delete this list?')) return;
-  D.lists = D.lists.filter(l=>l.id!==id); save(); renderHome();
+  D.lists = D.lists.filter(function(l){ return l.id !== id; });
+  save(); renderHome();
 }
 
-// ── LIST ──
+// LIST
 function openList(id) {
   CID = id; qtyMode = false;
   document.getElementById('home').classList.remove('active');
@@ -273,240 +308,244 @@ function goHome() {
   document.getElementById('home').classList.add('active');
   renderHome();
 }
-
 function toggleQtyMode() {
   qtyMode = !qtyMode;
   document.getElementById('btn-qty').classList.toggle('on', qtyMode);
   renderList();
 }
-
 function recalcTotal() {
-  const l = GL(); if (!l || l.items.length < 2) return;
-  const sum = l.items.slice(1).filter(x=>!x.done).reduce((s,x)=>s+(x.amt||0),0);
-  l.items[0].amt = sum;
+  var l = GL(); if (!l || l.items.length < 2) return;
+  var sum = l.items.slice(1).filter(function(x){ return !x.done; }).reduce(function(s,x){ return s + (x.amt||0); }, 0);
+  l.items[0].amt = Math.round(sum * 100) / 100;
 }
+function selectAll()   { var l=GL(); if(!l) return; l.items.slice(1).forEach(function(i){ i.done=true;  }); recalcTotal(); save(); renderList(); }
+function deselectAll() { var l=GL(); if(!l) return; l.items.slice(1).forEach(function(i){ i.done=false; }); recalcTotal(); save(); renderList(); }
 
-function selectAll() {
-  const l = GL(); if (!l) return;
-  l.items.slice(1).forEach(i => i.done = true);
-  recalcTotal(); save(); renderList();
-}
-function deselectAll() {
-  const l = GL(); if (!l) return;
-  l.items.slice(1).forEach(i => i.done = false);
-  recalcTotal(); save(); renderList();
+function numField(val, onchange) {
+  return '<input class="num-inp" type="text" inputmode="decimal" pattern="[0-9]*\\.?[0-9]*"'
+    + ' value="' + (val||0) + '"'
+    + ' onchange="' + onchange + '"'
+    + ' onblur="' + onchange + '">';
 }
 
 function renderList() {
-  const l = GL(); if (!l) return;
+  var l = GL(); if (!l) return;
   document.getElementById('lv-title').textContent = l.name;
-  const b = document.getElementById('lv-body');
+  var b = document.getElementById('lv-body');
+  var pinned = l.items.length ? l.items[0] : null;
+  var rest   = l.items.slice(1);
+  var html   = '<table>';
 
-  const pinned = l.items.length ? l.items[0] : null;
-  const rest   = l.items.slice(1);
-
-  let html = '<div class="tbl-card"><table>';
-
-  // Column headers
+  // Headers
   if (qtyMode) {
-    html += `<tr class="tbl-head">
-      <td class="col-name">Item Name</td>
-      <td class="col-qty">Qty</td>
-      <td class="col-unit">Unit £</td>
-      <td class="col-amt">Total</td>
-      <td class="col-del"></td>
-    </tr>`;
+    html += '<tr class="tbl-head">'
+      + '<td class="col-name">Item Name</td>'
+      + '<td class="col-qty" style="text-align:right">Qty</td>'
+      + '<td class="col-unit" style="text-align:right">Unit £</td>'
+      + '<td class="col-amt" style="text-align:right">Total</td>'
+      + '<td class="col-del"></td></tr>';
   } else {
-    html += `<tr class="tbl-head">
-      <td class="col-name">Item</td>
-      <td class="col-amt">Amount</td>
-      <td class="col-del"></td>
-    </tr>`;
+    html += '<tr class="tbl-head">'
+      + '<td class="col-name">Item</td>'
+      + '<td class="col-amt" style="text-align:right">Amount</td>'
+      + '<td class="col-del"></td></tr>';
   }
 
   // Pinned total row
   if (pinned) {
     if (qtyMode) {
-      html += `<tr class="tbl-total">
-        <td class="col-name"><input class="cell-inp" value="${esc(pinned.name)}" onchange="updateName('${pinned.id}',this.value)"></td>
-        <td class="col-qty"></td>
-        <td class="col-unit"></td>
-        <td class="col-amt"><input class="num-inp" type="number" value="${pinned.amt||0}" onchange="updateAmt('${pinned.id}',this.value)" onblur="updateAmt('${pinned.id}',this.value)"></td>
-        <td class="col-del"><button class="xbtn" onclick="delItem('${pinned.id}')">✕</button></td>
-      </tr>`;
+      html += '<tr class="tbl-total">'
+        + '<td class="col-name"><input class="cell-inp" value="' + esc(pinned.name) + '" onchange="updateName(\'' + pinned.id + '\',this.value)"></td>'
+        + '<td class="col-qty"></td><td class="col-unit"></td>'
+        + '<td class="col-amt">' + numField(pinned.amt, 'updateAmt(\'' + pinned.id + '\',this.value)') + '</td>'
+        + '<td class="col-del"><button class="xbtn" onclick="delItem(\'' + pinned.id + '\')">✕</button></td>'
+        + '</tr>';
     } else {
-      html += `<tr class="tbl-total">
-        <td class="col-name"><input class="cell-inp" value="${esc(pinned.name)}" onchange="updateName('${pinned.id}',this.value)"></td>
-        <td class="col-amt"><input class="num-inp" type="number" value="${pinned.amt||0}" onchange="updateAmt('${pinned.id}',this.value)" onblur="updateAmt('${pinned.id}',this.value)"></td>
-        <td class="col-del"><button class="xbtn" onclick="delItem('${pinned.id}')">✕</button></td>
-      </tr>`;
+      html += '<tr class="tbl-total">'
+        + '<td class="col-name"><input class="cell-inp" value="' + esc(pinned.name) + '" onchange="updateName(\'' + pinned.id + '\',this.value)"></td>'
+        + '<td class="col-amt">' + numField(pinned.amt, 'updateAmt(\'' + pinned.id + '\',this.value)') + '</td>'
+        + '<td class="col-del"><button class="xbtn" onclick="delItem(\'' + pinned.id + '\')">✕</button></td>'
+        + '</tr>';
     }
   }
 
   // Data rows
-  rest.forEach(i => {
-    const doneStyle = i.done ? 'text-decoration:line-through;color:var(--muted)' : '';
+  rest.forEach(function(i) {
+    var ds = i.done ? 'text-decoration:line-through;color:var(--muted)' : '';
     if (qtyMode) {
-      html += `<tr class="tbl-row">
-        <td class="col-name">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <div class="check${i.done?' on':''}" onclick="toggle('${i.id}')">${i.done?'✓':''}</div>
-            <input class="cell-inp" value="${esc(i.name)}" onchange="updateName('${i.id}',this.value)" style="${doneStyle}">
-          </div>
-        </td>
-        <td class="col-qty"><input class="num-inp" type="number" value="${i.qty||''}" placeholder="0" onchange="updateQty('${i.id}',this.value)" onblur="updateQty('${i.id}',this.value)"></td>
-        <td class="col-unit"><input class="num-inp" type="number" value="${i.unit||''}" placeholder="0" onchange="updateUnit('${i.id}',this.value)" onblur="updateUnit('${i.id}',this.value)"></td>
-        <td class="col-amt"><input class="num-inp" type="number" value="${i.amt||0}" onchange="updateAmt('${i.id}',this.value)" onblur="updateAmt('${i.id}',this.value)"></td>
-        <td class="col-del"><button class="xbtn" onclick="delItem('${i.id}')">✕</button></td>
-      </tr>`;
+      html += '<tr class="tbl-row">'
+        + '<td class="col-name"><div class="name-cell">'
+        + '<div class="check' + (i.done?' on':'') + '" onclick="toggle(\'' + i.id + '\')">' + (i.done?'✓':'') + '</div>'
+        + '<input class="cell-inp" value="' + esc(i.name) + '" onchange="updateName(\'' + i.id + '\',this.value)" style="' + ds + '">'
+        + '</div></td>'
+        + '<td class="col-qty">' + numField(i.qty||0, 'updateQty(\'' + i.id + '\',this.value)') + '</td>'
+        + '<td class="col-unit">' + numField(i.unit||0, 'updateUnit(\'' + i.id + '\',this.value)') + '</td>'
+        + '<td class="col-amt">' + numField(i.amt||0, 'updateAmt(\'' + i.id + '\',this.value)') + '</td>'
+        + '<td class="col-del"><button class="xbtn" onclick="delItem(\'' + i.id + '\')">✕</button></td>'
+        + '</tr>';
     } else {
-      html += `<tr class="tbl-row">
-        <td class="col-name">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <div class="check${i.done?' on':''}" onclick="toggle('${i.id}')">${i.done?'✓':''}</div>
-            <input class="cell-inp" value="${esc(i.name)}" onchange="updateName('${i.id}',this.value)" style="${doneStyle}">
-          </div>
-        </td>
-        <td class="col-amt"><input class="num-inp" type="number" value="${i.amt||0}" onchange="updateAmt('${i.id}',this.value)" onblur="updateAmt('${i.id}',this.value)"></td>
-        <td class="col-del"><button class="xbtn" onclick="delItem('${i.id}')">✕</button></td>
-      </tr>`;
+      html += '<tr class="tbl-row">'
+        + '<td class="col-name"><div class="name-cell">'
+        + '<div class="check' + (i.done?' on':'') + '" onclick="toggle(\'' + i.id + '\')">' + (i.done?'✓':'') + '</div>'
+        + '<input class="cell-inp" value="' + esc(i.name) + '" onchange="updateName(\'' + i.id + '\',this.value)" style="' + ds + '">'
+        + '</div></td>'
+        + '<td class="col-amt">' + numField(i.amt||0, 'updateAmt(\'' + i.id + '\',this.value)') + '</td>'
+        + '<td class="col-del"><button class="xbtn" onclick="delItem(\'' + i.id + '\')">✕</button></td>'
+        + '</tr>';
     }
   });
 
-  // Empty input row
+  // Inline empty row at bottom
   if (qtyMode) {
-    html += `<tr class="new-row">
-      <td class="col-name"><input class="cell-inp" id="nr-name" placeholder="New item…" onkeydown="newRowKey(event)"></td>
-      <td class="col-qty"><input class="num-inp" id="nr-qty" type="number" placeholder="0" onkeydown="newRowKey(event)" oninput="calcNewRow()"></td>
-      <td class="col-unit"><input class="num-inp" id="nr-unit" type="number" placeholder="0" onkeydown="newRowKey(event)" oninput="calcNewRow()"></td>
-      <td class="col-amt"><input class="num-inp" id="nr-amt" type="number" placeholder="0" onkeydown="newRowKey(event)"></td>
-      <td class="col-del"></td>
-    </tr>`;
+    html += '<tr class="new-row">'
+      + '<td class="col-name"><input class="cell-inp" id="nr-name" placeholder="New item…" onkeydown="nrKey(event,\'name\')" onkeyup="nrKey(event,\'name\')"></td>'
+      + '<td class="col-qty"><input class="num-inp" id="nr-qty" type="text" inputmode="decimal" placeholder="0" oninput="calcNewRow()" onkeydown="nrKey(event,\'qty\')" onkeyup="nrKey(event,\'qty\')"></td>'
+      + '<td class="col-unit"><input class="num-inp" id="nr-unit" type="text" inputmode="decimal" placeholder="0" oninput="calcNewRow()" onkeydown="nrKey(event,\'unit\')" onkeyup="nrKey(event,\'unit\')"></td>'
+      + '<td class="col-amt"><input class="num-inp" id="nr-amt" type="text" inputmode="decimal" placeholder="0" onkeydown="nrKey(event,\'amt\')" onkeyup="nrKey(event,\'amt\')"></td>'
+      + '<td class="col-del"><button class="add-row-btn" onclick="commitNewRow()" title="Add">+</button></td></tr>';
   } else {
-    html += `<tr class="new-row">
-      <td class="col-name"><input class="cell-inp" id="nr-name" placeholder="New item…" onkeydown="newRowKey(event)"></td>
-      <td class="col-amt"><input class="num-inp" id="nr-amt" type="number" placeholder="0" onkeydown="newRowKey(event)"></td>
-      <td class="col-del"></td>
-    </tr>`;
+    html += '<tr class="new-row">'
+      + '<td class="col-name"><input class="cell-inp" id="nr-name" placeholder="New item…" onkeydown="nrKey(event,\'name\')" onkeyup="nrKey(event,\'name\')"></td>'
+      + '<td class="col-amt"><input class="num-inp" id="nr-amt" type="text" inputmode="decimal" placeholder="0" onkeydown="nrKey(event,\'amt\')" onkeyup="nrKey(event,\'amt\')"></td>'
+      + '<td class="col-del"><button class="add-row-btn" onclick="commitNewRow()" title="Add">+</button></td></tr>';
   }
 
-  html += '</table></div>';
+  html += '</table>';
   b.innerHTML = html;
 }
 
+function nrKey(e, field) {
+  var isEnter = (e.key === 'Enter' || e.keyCode === 13);
+  var isTab   = (e.key === 'Tab'   || e.keyCode === 9);
+  if (!isEnter && !isTab) return;
+  // prevent double-fire: act on keydown for Tab, keyup for Enter (iOS fires Enter on keyup)
+  if (isTab   && e.type !== 'keydown') return;
+  if (isEnter && e.type !== 'keyup')   return;
+  e.preventDefault();
+  var order = qtyMode ? ['name','qty','unit','amt'] : ['name','amt'];
+  var idx = order.indexOf(field);
+  if (idx < order.length - 1) {
+    var next = document.getElementById('nr-' + order[idx + 1]);
+    if (next) { next.focus(); if (next.select) next.select(); }
+  } else {
+    commitNewRow();
+  }
+}
+
 function calcNewRow() {
-  const q = parseFloat(document.getElementById('nr-qty')?.value)||0;
-  const u = parseFloat(document.getElementById('nr-unit')?.value)||0;
-  const a = document.getElementById('nr-amt');
+  var q = parseFloat((document.getElementById('nr-qty')  || {}).value)  || 0;
+  var u = parseFloat((document.getElementById('nr-unit') || {}).value) || 0;
+  var a = document.getElementById('nr-amt');
   if (a && q && u) a.value = +(q * u).toFixed(2);
 }
 
+function commitNewRow() {
+  var nameEl = document.getElementById('nr-name');
+  if (!nameEl) return;
+  var name = nameEl.value.trim();
+  if (!name) { nameEl.focus(); return; }
+  var amt  = parseFloat((document.getElementById('nr-amt')  || {}).value)  || 0;
+  var qty  = parseFloat((document.getElementById('nr-qty')  || {}).value)  || 0;
+  var unit = parseFloat((document.getElementById('nr-unit') || {}).value) || 0;
+  GL().items.push({id:uid(), name:name, amt:amt, qty:qty, unit:unit, cat:'', done:false});
+  recalcTotal(); save(); renderList();
+  setTimeout(function(){ var n = document.getElementById('nr-name'); if(n) n.focus(); }, 60);
+}
+
 function toggle(id) {
-  const l=GL(), i=l.items.find(x=>x.id===id); if(!i) return;
+  var l=GL(), i=l.items.find(function(x){ return x.id===id; }); if(!i) return;
   i.done=!i.done; recalcTotal(); save(); renderList();
 }
 function updateName(id, val) {
-  const l=GL(), i=l.items.find(x=>x.id===id);
+  var l=GL(), i=l.items.find(function(x){ return x.id===id; });
   if(i){ i.name=val||i.name; save(); }
 }
 function updateAmt(id, val) {
-  const l=GL(), i=l.items.find(x=>x.id===id);
-  if(i){ i.amt=parseFloat(val)||0; save(); }
+  var l=GL(), i=l.items.find(function(x){ return x.id===id; });
+  if(i){ i.amt=parseFloat(val)||0; recalcTotal(); save();
+    // just update the pinned total cell without full re-render
+    var pinnedInput = document.querySelector('.tbl-total .num-inp');
+    if (pinnedInput && l.items[0]) pinnedInput.value = l.items[0].amt;
+  }
 }
 function updateQty(id, val) {
-  const l=GL(), i=l.items.find(x=>x.id===id); if(!i) return;
+  var l=GL(), i=l.items.find(function(x){ return x.id===id; }); if(!i) return;
   i.qty=parseFloat(val)||0;
-  if(i.unit) { i.amt=+(i.qty*i.unit).toFixed(2); }
+  if(i.unit) i.amt=+(i.qty*i.unit).toFixed(2);
   recalcTotal(); save(); renderList();
 }
 function updateUnit(id, val) {
-  const l=GL(), i=l.items.find(x=>x.id===id); if(!i) return;
+  var l=GL(), i=l.items.find(function(x){ return x.id===id; }); if(!i) return;
   i.unit=parseFloat(val)||0;
-  if(i.qty) { i.amt=+(i.qty*i.unit).toFixed(2); }
+  if(i.qty) i.amt=+(i.qty*i.unit).toFixed(2);
   recalcTotal(); save(); renderList();
 }
 function delItem(id) {
-  const l=GL(); l.items=l.items.filter(i=>i.id!==id);
+  var l=GL(); l.items=l.items.filter(function(i){ return i.id!==id; });
   recalcTotal(); save(); renderList();
 }
 
-function newRowKey(e) {
-  if (e.key === 'Tab' && e.target.id === 'nr-name') { e.preventDefault(); (document.getElementById('nr-qty')||document.getElementById('nr-amt'))?.focus(); return; }
-  if (e.key === 'Tab' && e.target.id === 'nr-qty')  { e.preventDefault(); document.getElementById('nr-unit')?.focus(); return; }
-  if (e.key === 'Tab' && e.target.id === 'nr-unit') { e.preventDefault(); document.getElementById('nr-amt')?.focus(); return; }
-  if (e.key !== 'Enter') return;
-  const name = document.getElementById('nr-name')?.value.trim(); if(!name) return;
-  const amt  = parseFloat(document.getElementById('nr-amt')?.value)||0;
-  const qty  = parseFloat(document.getElementById('nr-qty')?.value)||0;
-  const unit = parseFloat(document.getElementById('nr-unit')?.value)||0;
-  GL().items.push({id:uid(), name, amt, qty, unit, cat:'', done:false});
-  recalcTotal(); save(); renderList();
-  setTimeout(()=>{ document.getElementById('nr-name')?.focus(); }, 50);
-}
-
-// ── MODALS ──
+// MODALS
 function showModal(id) {
   closeModals();
   document.getElementById(id).classList.add('open');
   if (id==='m-additem') {
-    const cats=(GL()||{categories:[]}).categories||[];
-    const opts=['<option value="">No category</option>',...cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`)].join('');
+    var cats=(GL()||{categories:[]}).categories||[];
+    var opts='<option value="">No category</option>'+cats.map(function(c){ return '<option value="'+esc(c)+'">'+esc(c)+'</option>'; }).join('');
     document.getElementById('mi-cat').innerHTML=opts;
     document.getElementById('pi-cat').innerHTML=opts;
     document.getElementById('pi-text').value='';
     switchSeg('manual');
   }
-  setTimeout(()=>{ document.querySelector(`#${id} .inp`)?.focus(); }, 280);
+  setTimeout(function(){ var f=document.querySelector('#'+id+' .inp'); if(f) f.focus(); }, 300);
 }
-function closeModals() { document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('open')); }
+function closeModals() { document.querySelectorAll('.overlay').forEach(function(o){ o.classList.remove('open'); }); }
 function bgClose(e,el) { if(e.target===el) closeModals(); }
 function switchSeg(s) {
-  document.getElementById('pane-manual').classList.toggle('on',s==='manual');
-  document.getElementById('pane-paste').classList.toggle('on',s==='paste');
-  document.getElementById('seg-manual').classList.toggle('on',s==='manual');
-  document.getElementById('seg-paste').classList.toggle('on',s==='paste');
+  document.getElementById('pane-manual').classList.toggle('on', s==='manual');
+  document.getElementById('pane-paste').classList.toggle('on',  s==='paste');
+  document.getElementById('seg-manual').classList.toggle('on',  s==='manual');
+  document.getElementById('seg-paste').classList.toggle('on',   s==='paste');
 }
-
 function doCreateList() {
-  const n=document.getElementById('nl-name').value.trim(); if(!n) return;
-  const totalRow = {id:uid(), name:'Total', amt:0, qty:0, unit:0, cat:'', done:false};
+  var n=document.getElementById('nl-name').value.trim(); if(!n) return;
+  var totalRow={id:uid(),name:'Total',amt:0,qty:0,unit:0,cat:'',done:false};
   D.lists.push({id:uid(),name:n,categories:[],items:[totalRow]});
   save(); closeModals(); renderHome();
   document.getElementById('nl-name').value='';
 }
 function doAddCat() {
-  const n=document.getElementById('ac-name').value.trim(); if(!n) return;
-  const l=GL(); if(!l.categories.includes(n)) l.categories.push(n);
+  var n=document.getElementById('ac-name').value.trim(); if(!n) return;
+  var l=GL(); if(!l.categories.includes(n)) l.categories.push(n);
   save(); closeModals(); renderList();
   document.getElementById('ac-name').value='';
 }
 function doAddManual() {
-  const n=document.getElementById('mi-name').value.trim(); if(!n) return;
-  const a=parseFloat(document.getElementById('mi-amt').value)||0;
-  const c=document.getElementById('mi-cat').value;
+  var n=document.getElementById('mi-name').value.trim(); if(!n) return;
+  var a=parseFloat(document.getElementById('mi-amt').value)||0;
+  var c=document.getElementById('mi-cat').value;
   GL().items.push({id:uid(),name:n,amt:a,qty:0,unit:0,cat:c,done:false});
   recalcTotal(); save(); closeModals(); renderList();
 }
 function doAddPaste() {
-  const raw=document.getElementById('pi-text').value.trim(); if(!raw) return;
-  const cat=document.getElementById('pi-cat').value;
-  const l=GL();
-  raw.split(/\r?\n/).forEach(line=>{
-    const parts=line.trim().split(/\t|,|  +/);
+  var raw=document.getElementById('pi-text').value.trim(); if(!raw) return;
+  var cat=document.getElementById('pi-cat').value;
+  var l=GL();
+  raw.split(/\r?\n/).forEach(function(line){
+    var parts=line.trim().split(/\t|,|  +/);
     if(!parts[0].trim()) return;
-    const name=parts[0].trim();
-    const amt=parts.length>=2?(parseFloat(parts[parts.length-1].replace(/[£,\s]/g,''))||0):0;
-    l.items.push({id:uid(),name,amt,qty:0,unit:0,cat,done:false});
+    var name=parts[0].trim();
+    var amt=parts.length>=2?(parseFloat(parts[parts.length-1].replace(/[£,\s]/g,''))||0):0;
+    l.items.push({id:uid(),name:name,amt:amt,qty:0,unit:0,cat:cat,done:false});
   });
   recalcTotal(); save(); closeModals(); renderList();
 }
 
-document.getElementById('nl-name').addEventListener('keydown',e=>{if(e.key==='Enter')doCreateList();});
-document.getElementById('ac-name').addEventListener('keydown',e=>{if(e.key==='Enter')doAddCat();});
-document.getElementById('mi-name').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('mi-amt').focus();});
-document.getElementById('mi-amt').addEventListener('keydown', e=>{if(e.key==='Enter')doAddManual();});
+document.getElementById('nl-name').addEventListener('keydown',function(e){ if(e.key==='Enter') doCreateList(); });
+document.getElementById('ac-name').addEventListener('keydown',function(e){ if(e.key==='Enter') doAddCat(); });
+document.getElementById('mi-name').addEventListener('keydown',function(e){ if(e.key==='Enter') document.getElementById('mi-amt').focus(); });
+document.getElementById('mi-amt').addEventListener('keydown', function(e){ if(e.key==='Enter') doAddManual(); });
 
-  
 renderHome();
 </script>
 </body>
